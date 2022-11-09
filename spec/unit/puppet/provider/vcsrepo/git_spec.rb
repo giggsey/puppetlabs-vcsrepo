@@ -299,6 +299,7 @@ BRANCHES
     context 'when its a SHA and is not different than the current SHA' do
       it 'and_return the current SHA' do
         resource[:revision] = 'currentsha'
+        expect(provider).to receive(:exec_git).with('rev-parse', '--short=10', 'HEAD').and_return('currentsha')
         allow(provider).to receive(:exec_git).with('branch', '--no-color', '-a').and_return(branch_a_list)
         expect(provider).to receive(:exec_git).with('rev-parse', '--revs-only', resource.value(:revision)).never
         expect(provider).to receive(:update_references).never
@@ -309,6 +310,7 @@ BRANCHES
     context 'when its a SHA and is different than the current SHA' do
       it 'and_return the current SHA' do
         resource[:revision] = 'othersha'
+        expect(provider).to receive(:exec_git).with('rev-parse', '--short=8', 'HEAD').and_return('currentsha')
         allow(provider).to receive(:exec_git).with('branch', '--no-color', '-a').and_return(branch_a_list)
         expect(provider).to receive(:exec_git).with('rev-parse', '--revs-only', resource.value(:revision)).and_return('othersha')
         expect(provider).to receive(:update_references)
@@ -320,6 +322,7 @@ BRANCHES
       it 'and_return the ref' do
         resource[:revision] = 'localbranch'
         allow(provider).to receive(:exec_git).with('branch', '--no-color', '-a').and_return(branch_a_list('localbranch'))
+        expect(provider).to receive(:exec_git).with('rev-parse', '--short=11', 'HEAD').and_return('currentsha')
         expect(provider).to receive(:exec_git).with('rev-parse', resource.value(:revision)).and_return('currentsha')
         expect(provider).to receive(:update_references)
         expect(provider.revision).to eq(resource.value(:revision))
@@ -330,6 +333,7 @@ BRANCHES
       it 'and_return the current SHA' do
         resource[:revision] = 'localbranch'
         allow(provider).to receive(:exec_git).with('branch', '--no-color', '-a').and_return(branch_a_list('localbranch'))
+        expect(provider).to receive(:exec_git).with('rev-parse', '--short=11', 'HEAD').and_return('currentsha')
         expect(provider).to receive(:exec_git).with('rev-parse', resource.value(:revision)).and_return('othersha')
         expect(provider).to receive(:update_references)
         expect(provider.revision).to eq('currentsha')
@@ -340,6 +344,7 @@ BRANCHES
       it 'and_return the ref' do
         resource[:revision] = 'remotebranch'
         allow(provider).to receive(:exec_git).with('branch', '--no-color', '-a').and_return("  remotes/origin/#{resource.value(:revision)}")
+        expect(provider).to receive(:exec_git).with('rev-parse', '--short=12', 'HEAD').and_return('currentsha')
         expect(provider).to receive(:exec_git).with('rev-parse', "origin/#{resource.value(:revision)}").and_return('currentsha')
         expect(provider).to receive(:update_references)
         expect(provider.revision).to eq(resource.value(:revision))
@@ -350,6 +355,7 @@ BRANCHES
       it 'fails' do
         resource[:revision] = 'remotebranch'
         allow(provider).to receive(:exec_git).with('branch', '--no-color', '-a').and_return(branch_a_list)
+        expect(provider).to receive(:exec_git).with('rev-parse', '--short=12', 'HEAD').and_return('currentsha')
         expect(provider).to receive(:exec_git).with('rev-parse', '--revs-only', resource.value(:revision)).and_return('')
         expect(provider).to receive(:update_references)
         expect { provider.revision }.to raise_error(RuntimeError, %r{not a local or remote ref$})
@@ -363,6 +369,7 @@ BRANCHES
         allow(provider).to receive(:exec_git).with('branch', '--no-color', '-a').and_return(branch_a_list('localbranch'))
         expect(provider).to receive(:update_references).never
         expect(provider).to receive(:exec_git).with('status')
+        expect(provider).to receive(:exec_git).with('rev-parse', '--short=11', 'HEAD').and_return('currentsha')
         expect(provider).to receive(:exec_git).with('rev-parse', resource.value(:revision)).and_return('currentsha')
         expect(provider.revision).to eq(resource.value(:revision))
       end

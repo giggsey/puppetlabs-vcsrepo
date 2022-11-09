@@ -528,11 +528,11 @@ Puppet::Type.type(:vcsrepo).provide(:git, parent: Puppet::Provider::Vcsrepo) do
     end
     if @resource.value(:revision)
       args = [ 'rev-parse', "--short=#{@resource.value(:revision).length}", rev]
-      current = at_path { git_with_identity(*args).strip }   
+      current = at_path { git_with_identity(*args).strip }
     else
       current = at_path { git_with_identity('rev-parse', rev).strip }
     end
-   
+
     if @resource.value(:revision) == current
       # if already pointed at desired revision, it must be a SHA, so just return it
       return current
